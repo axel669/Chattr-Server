@@ -159,7 +159,20 @@ var sslOptions={
 	key:fs.readFileSync("test-key.pem"),
 	cert:fs.readFileSync("test-cert.pem")
 };
-var server=http.createServer(serverCall);
+var server=http.createServer(function(request,response){
+	var url=URL.parse(request.url);
+	if(url.pathname==="/")
+	{
+		response.writeHead(301,{"Location":"https://"+request.headers.host});
+		response.end("Moved permanently.");
+		return;
+	}
+	else
+	{
+		res.writeHead(404,{});
+		res.end("");
+	}
+});
 var sserver=https.createServer(sslOptions,serverCall);
 
 var io=require("socket.io")(sserver);

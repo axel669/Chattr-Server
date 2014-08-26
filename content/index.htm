@@ -59,7 +59,7 @@
 		
 		var user={};
 		
-		var socket=new io("https://localhost/");
+		var socket=new io();
 		socket.on("connect",function(){
 			var username=-1;
 			while(username===-1)
