@@ -120,7 +120,24 @@ var router={
 
 function serverCall(request, response){
 	// console.log("processing secure request",request.headers.host);
+	// console.log("is secure?",request.connection.encrypted);
 	var url=URL.parse(request.url,true);
+	
+	if(!request.connection.hasOwnProperty("encrypted"))
+	{
+		if(url.pathname==="/")
+		{
+			response.writeHead(200,{"Content-Type":"text/html"});
+			response.end("<!DOCTYPE html><html><head><title>Chattr</title></head><body>Gotta use dat <a href='https://"+request.headers.host+"'>https</a></body></html>");
+		}
+		else
+		{
+			response.writeHead(404,{});
+			response.end("This is not the page you are looking for");
+		}
+		return;
+	}
+	
 	var paths=url.pathname.split("/");
 	var current=router.root;
 	var index=0;
@@ -161,6 +178,7 @@ var sslOptions={
 	cert:fs.readFileSync("test-cert.pem")
 };
 var server=http.createServer(function(request,response){
+	console.log("is secure?",request.connection.encrypted);
 	var url=URL.parse(request.url);
 	// console.log("processing regular request",request.headers.host);
 	if(url.pathname==="/")
@@ -197,7 +215,7 @@ io.on('connection',function(socket){
 	});
 });
 
-server.listen(80);
+// server.listen(80);
 sserver.listen(443);
 
 
