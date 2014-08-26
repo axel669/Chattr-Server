@@ -119,6 +119,7 @@ var router={
 };
 
 function serverCall(request, response){
+	// console.log("processing secure request",request.headers.host);
 	var url=URL.parse(request.url,true);
 	var paths=url.pathname.split("/");
 	var current=router.root;
@@ -161,16 +162,16 @@ var sslOptions={
 };
 var server=http.createServer(function(request,response){
 	var url=URL.parse(request.url);
+	// console.log("processing regular request",request.headers.host);
 	if(url.pathname==="/")
 	{
-		response.writeHead(301,{"Location":"https://"+request.headers.host});
-		response.end("Moved permanently.");
-		return;
+		response.writeHead(200,{"Content-Type":"text/html"});
+		response.end("<!DOCTYPE html><html><head><title>Chattr</title></head><body>Gotta use dat <a href='https://"+request.headers.host+"'>https</a></body></html>");
 	}
 	else
 	{
 		res.writeHead(404,{});
-		res.end("");
+		res.end("This is not the page you are looking for");
 	}
 });
 var sserver=https.createServer(sslOptions,serverCall);
