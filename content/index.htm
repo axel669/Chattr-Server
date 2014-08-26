@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chattr Alpha</title>
+		<meta charset="utf8" />
+		<script src="js/architect.js"></script>
+		<script src="js/factotum.js"></script>
+		<script src="js/keyblade.js"></script>
+		<script src="js/socket.io-min.js"></script>
+		<script src="js/xregexp-min.js"></script>
+		<style>
+		html, body
+		{
+			width:100%;
+			height:100%;
+			padding:0px;
+			margin:0px;
+		}
+		*
+		{
+			box-sizing:border-box;
+		}
+		textarea
+		{
+			resize:none;
+		}
+		div
+		{
+			font-family:"Courier New",monospace;
+			font-size:14px;
+		}
+		.system
+		{
+			font-style:italic;
+			font-color:rgb(150,150,150);
+		}
+		</style>
+	</head>
+	<body>
+		<div style="background-color:cyan; position:absolute; top:0px; left:0px; right:0px; top:0px; bottom:50px; overflow:auto;" data-name="history"></div>
+		<textarea data-name="message" style="position:absolute; bottom:0px; left:0px; height:50px; width:100%;" data-allow-bindings></textarea>
+		<div style="background-color:rgba(0,0,0,0.5); position:absolute; top:0px; right:0px; width:200px; height:450px; overflow:auto;" data-name="userList"></div>
+		<script type="sandbox-js">
+		function displayMessage(from,msg)
+		{
+			var message=document.createElement("div");
+			// message.innerHTML=msg;
+			if(!from)
+			{
+				message.className="system";
+				message.innerHTML=msg;
+			}
+			else
+				message.innerHTML=from+": "+msg;
+			history.appendChild(message);
+			history.scrollTop=history.scrollHeight;
+		}
+		displayMessage(null,"Connecting...");
+		
+		var user={};
+		
+		var socket=new io("https://localhost/");
+		socket.on("connect",function(){
+			var username=-1;
+			while(username===-1)
+			{
+				username=prompt("enter a username");
+				if(/^[\w\d\-_]+$/.test(username)===false)
+					username=-1;
+			}
+			if(typeof(username)!=='string')
+			{
+				displayMessage(null,"Ya'll gotta pick a name.");
+				displayMessage(null,"Refresh and try again.");
+				return;
+			}
+			user.name=username;
+			
+			message.value="";
+			message.addEventListener("keydown",function(evt){
+				if(evt.keyCode===13 && !evt.shiftKey)
+				{
+					evt.preventDefault();
+					setImmediate(function(){
+						socket.emit("chat message",{msg:message.value,from:user.name});
+						displayMessage(user.name,message.value);
+						message.value="";
+					});
+					return false;
+				}
+			},false);
+			
+			socket.emit("login",username);
+			socket.emit("chat message",{msg:username+" has connected"});
+			displayMessage(null,username+" has connected");
+		});
+		socket.on('chat message',function(msg){
+			displayMessage(msg.from,msg.msg);
+		});
+		socket.on('disconnect',function(){
+			displayMessage(null,"disconnected from server");
+		});
+		socket.on('user list',function(users){
+			userList.innerHTML=users.join("<br />");
+		});
+		</script>
+	</body>
+</html>
