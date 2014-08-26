@@ -123,7 +123,7 @@ function serverCall(request, response){
 	// console.log("is secure?",request.connection.encrypted);
 	var url=URL.parse(request.url,true);
 	
-	if(!request.connection.hasOwnProperty("encrypted"))
+	if(request.headers["x-forwarded-proto"]==="http")
 	{
 		if(url.pathname==="/")
 		{
