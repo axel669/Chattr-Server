@@ -192,7 +192,7 @@ var server=http.createServer(function(request,response){
 		response.end("This is not the page you are looking for");
 	}
 });
-var sserver=https.createServer(sslOptions,serverCall);
+var sserver=http.createServer(serverCall);
 
 var io=require("socket.io")(sserver);
 
@@ -216,7 +216,7 @@ io.on('connection',function(socket){
 });
 
 // server.listen(80);
-sserver.listen(443);
+sserver.listen(80);
 
 
 require("./content/js/factotum");
