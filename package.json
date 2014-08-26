@@ -3,5 +3,12 @@
 	"version":"0.0.1",
 	"dependencies":{
 		"socket.io":"1.0.6"
+	},
+	"scripts":{
+		"start":"node server.js"
+	},
+	"subdomain":"chattr-server",
+	"engines":{
+		"node":"0.10.x"
 	}
 }
