@@ -170,8 +170,8 @@ var server=http.createServer(function(request,response){
 	}
 	else
 	{
-		res.writeHead(404,{});
-		res.end("This is not the page you are looking for");
+		response.writeHead(404,{});
+		response.end("This is not the page you are looking for");
 	}
 });
 var sserver=https.createServer(sslOptions,serverCall);
