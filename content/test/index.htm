@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+	</head>
+	<body>
+		Wat
+	</body>
+	<script>
+	(function(){
+		var wrapper=null;
+		var content=null;
+		var contentWrapper=null;
+		var is_open=false;
+		function init()
+		{
+			if(!document.body)
+				throw new Error("Cannot attach popups to the document before it's been created");
+			
+			if(is_open) return;
+			if(wrapper===null)
+			{
+				wrapper=document.createElement("div");
+				wrapper.style.position='absolute';
+				wrapper.style.top=
+					wrapper.style.left=
+					wrapper.style.right=
+					wrapper.style.bottom='0px';
+				wrapper.style.zIndex=10000;
+				wrapper.style.backgroundColor="rgba(0,0,0,0.25)";
+				
+				contentWrapper=document.createElement("div");
+				contentWrapper.style.position='absolute';
+				contentWrapper.style.top=
+					contentWrapper.style.left=
+					contentWrapper.style.right=
+					contentWrapper.style.bottom='20%';
+				contentWrapper.style.backgroundColor="black";
+				contentWrapper.style.borderRadius="10px";
+				
+				content=document.createElement("div");
+				content.style.position='absolute';
+				content.style.top=
+					content.style.left=
+					content.style.right=
+					content.style.bottom='10px';
+				content.style.backgroundColor='white';
+				
+				contentWrapper.appendChild(content);
+				wrapper.appendChild(contentWrapper);
+				
+				document.body.appendChild(wrapper);
+			}
+			wrapper.style.display="";
+		}
+		
+		window.Popup={
+			alert:function(msg){
+				init();
+			}
+		};
+	})();
+	
+	// var d=new Date();
+	// d.setTime(Date.parse("10/10/14"));
+	// console.log(d);
+	// document.cookie="test=10;expires="+(d.toUTCString());
+	// document.cookie="test2=1000;expires="+(d.toUTCString());
+	
+	Popup.alert("test");
+	</script>
+</html>

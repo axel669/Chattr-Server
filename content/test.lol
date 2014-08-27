@@ -11,5 +11,6 @@
 		</form>
 		<div><pre>{%: JSON.stringify(GET) %}</div></pre>
 		<div><pre>{%: JSON.stringify(POST) %}</div></pre>
+		<div><pre>{%: JSON.stringify($data.userInfo) %}</div></pre>
 	</body>
 </html>

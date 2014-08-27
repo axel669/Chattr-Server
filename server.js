@@ -40,7 +40,8 @@ function getFile(filename,isTemplate,data,cb)
 var mimeTypes={
 	".htm":"text/html",
 	".js":"text/javascript",
-	".lol":"text/html"
+	".lol":"text/html",
+	".css":"text/css"
 };
 function getMime(file)
 {
@@ -86,11 +87,17 @@ function standardResponse(url,request,response,data,cb)
 	});
 }
 
+function HashTable()
+{
+	this.data={};
+	this.queue=[];
+}
+
 var router={
 	root:{
-		// process:function(url,request,response,data,cb){
-		// 	standardResponse(url,request,response,data,cb);
-		// },
+		process:function(url,request,response,data,cb){
+			standardResponse(url,request,response,data,cb);
+		},
 		file:{
 			register:function(url,request,response,data,cb){
 				Users.create(data.POST.username,sha512Hash(data.POST.password)).then(function(created){
@@ -102,18 +109,37 @@ var router={
 						headers:{}
 					});
 				});
-			},
-			wat:function(url,request,response,data,cb){
-				cb({
-					filename:"wat.htm",
-					html:"This is some html?",
-					status:200,
-					encoding:"utf8",
-					headers:{}
-				});
 			}
+		},
+		auth:function(url,request,response,data,cb){
+			Users.auth(data.GET.username,data.GET.password).then(function(doc){
+				data.userInfo=doc;
+				standardResponse("/content/test.lol",request,response,data,cb);
+			});
 		}
 	}
+};
+
+function Cookie(request)
+{
+	this.__cookie_string=request.headers.cookie;
+	this.__cache={};
+}
+Cookie.prototype.get=function(name){
+	if(!this.__cache.hasOwnProperty(name))
+	{
+		var index=this.__cookie_string.indexOf(name+"=");
+		if(index===-1)
+		{
+			this.__cache[name]=null;
+			return null;
+		}
+		index=index+name.length+1;
+		var end=this.__cookie_string.indexOf(";",index);
+		if(end===-1) end=this.__cookie_string.length;
+		this.__cache[name]=decodeURIComponent(this.__cookie_string.substring(index,end));
+	}
+	return this.__cache[name];
 };
 
 function serverCall(request, response){
@@ -146,6 +172,7 @@ function serverCall(request, response){
 		postData+=data;
 	});
 	request.on("end",function(){
+		// console.log(request.headers.cookie);
 		switch(url.query.postFormat)
 		{
 			case "json":
@@ -156,12 +183,12 @@ function serverCall(request, response){
 				postData=URL.parse("?"+postData,true).query;
 				break;
 		}
-		proc(url.pathname,request,response,{GET:url.query,POST:postData,COOKIE:{}},function(info){
+		proc(url.pathname,request,response,{GET:url.query,POST:postData,COOKIE:new Cookie(request)},function(info){
 			var headers=info.headers;
 			if(!headers.hasOwnProperty("Content-Type"))
 				headers["Content-Type"]=getMime(info.filename);
 			headers["Content-Length"]=info.html.length;
-			console.log('showing page:',request.url,"->",info.filename);
+			// console.log('showing page:',request.url,"->",info.filename);
 			response.writeHead(info.status,headers);
 			response.end(info.html,info.encoding);
 		});
@@ -194,10 +221,13 @@ io.on('connection',function(socket){
 		users[name]=null;
 		io.emit("user list",Object.keys(users));
 	});
+	socket.on("user auth",function(info){
+		// Users.
+	});
 });
 
 // server.listen(80);
-sserver.listen(80);
+// sserver.listen(80);
 
 
 require("./content/js/factotum");
@@ -254,6 +284,21 @@ var Users={
 			});
 		});
 		return p;
+	},
+	auth:function(username,password){
+		var p=new promise();
+		var keys={};
+		keys["users."+username]=1;
+		keys._id=0;
+		var db=DB.getConnection();
+		var query={};
+		query["users."+username]={pw:sha512Hash(password)};
+		console.log("checking...");
+		db.users.findOne({_id:"users"},query,keys,function(err,doc){
+			console.log(err,doc);
+			p.resolve(doc);
+		});
+		return p;
 	}
 };
 
@@ -263,3 +308,6 @@ function sha512Hash(str,salt)
 	salt=salt||"";
 	return crypto.createHash("sha512").update(str).update(salt).digest("hex");
 }
+
+// Users.auth("watman","wat").then(F.log);
+// Users.exists("watman").then(F.log);
