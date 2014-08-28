@@ -123,22 +123,22 @@ function parseAnchor(str)
 {
 	var pos=0, len=str.length;
 	var info={
-		anchor:{
-			left:0,
-			right:0,
-			top:0,
-			bottom:0
-		},
-		offset:{
-			left:0,
-			right:0,
-			top:0,
-			bottom:0
-		},
-		size:{
-			width:null,
-			height:null
-		}
+		// anchor:{
+		// 	left:0,
+		// 	right:0,
+		// 	top:0,
+		// 	bottom:0
+		// },
+		// offset:{
+		// 	left:0,
+		// 	right:0,
+		// 	top:0,
+		// 	bottom:0
+		// },
+		// size:{
+		// 	width:null,
+		// 	height:null
+		// }
 	};
 	while(pos<len)
 	{
@@ -151,7 +151,9 @@ function parseAnchor(str)
 			pos+=prop.length+1;
 			var value=parse_num(str,pos);
 			pos+=value.length;
-			info[type][prop]=+value;
+			if(!info.hasOwnProperty(prop))
+				info[prop]={};
+			info[prop][type]=+value;
 		}
 		pos+=2;
 	}
@@ -165,30 +167,36 @@ function compileAnchor(elem,layoutVars)
 		return layoutVars[name];
 	});
 	var info=parseAnchor(anchorText);
+	console.log(info);
 	
-	elem.style.left=info.anchor.left+"%";
-	elem.style.top=info.anchor.top+"%";
-	if(info.offset.left!==0)
-		elem.style.marginLeft=info.offset.left+'px';
-	if(info.offset.top!==0)
-		elem.style.marginTop=info.offset.top+'px';
+	var style=elem.style;
+	if(info.width)
+	{
+	}
 	
-	if(info.size.width!==null)
-		elem.style.width=info.size.width+'px';
-	else
-	{
-		elem.style.right=(100-info.anchor.right)+"%";
-		if(info.offset.right!==0)
-			elem.style.marginRight=info.offset.right+'px';
-	}
-	if(info.size.height!==null)
-		elem.style.height=info.size.height+'px';
-	else
-	{
-		elem.style.bottom=(100-info.anchor.bottom)+"%";
-		if(info.offset.bottom!==0)
-			elem.style.marginBottom=info.offset.bottom+'px';
-	}
+	// elem.style.left=info.anchor.left+"%";
+	// elem.style.top=info.anchor.top+"%";
+	// if(info.offset.left!==0)
+	// 	elem.style.marginLeft=info.offset.left+'px';
+	// if(info.offset.top!==0)
+	// 	elem.style.marginTop=info.offset.top+'px';
+	
+	// if(info.size.width!==null)
+	// 	elem.style.width=info.size.width+'px';
+	// else
+	// {
+	// 	elem.style.right=(100-info.anchor.right)+"%";
+	// 	if(info.offset.right!==0)
+	// 		elem.style.marginRight=info.offset.right+'px';
+	// }
+	// if(info.size.height!==null)
+	// 	elem.style.height=info.size.height+'px';
+	// else
+	// {
+	// 	elem.style.bottom=(100-info.anchor.bottom)+"%";
+	// 	if(info.offset.bottom!==0)
+	// 		elem.style.marginBottom=info.offset.bottom+'px';
+	// }
 	elem.lastLayout=anchorText;
 	
 	var styleCheck=getComputedStyle(elem);
