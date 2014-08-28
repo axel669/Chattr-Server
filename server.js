@@ -324,6 +324,9 @@ function sha512Hash(str,salt)
 // Users.exists("watman").then(F.log);
 
 var db=DB.getConnection();
+db.users.findOne({username:"watman"},{_id:0,username:1},function(err,doc){
+	console.log("found:",doc);
+});
 // db.users.insert({username:"watman",password:sha512Hash("wat")},{w:1},function(err,result){
 // 	F.puts(err,result);
 // });
