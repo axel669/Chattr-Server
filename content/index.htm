@@ -37,14 +37,16 @@
 		</style>
 	</head>
 	<body>
-		<div style="background-color:cyan; position:absolute; top:0px; left:0px; right:0px; top:0px; bottom:50px; overflow:auto;" data-name="history"></div>
+		<!-- <div style="background-color:cyan; position:absolute; top:0px; left:0px; right:0px; top:0px; bottom:50px; overflow:auto;" data-name="history"></div>
 		<textarea data-name="message" style="position:absolute; bottom:0px; left:0px; height:50px; width:100%;" data-allow-bindings></textarea>
-		<div style="background-color:rgba(0,0,0,0.5); position:absolute; top:0px; right:0px; width:200px; height:450px; overflow:auto;" data-name="userList"></div>
+		<div style="background-color:rgba(0,0,0,0.5); position:absolute; top:0px; right:0px; width:200px; height:450px; overflow:auto;" data-name="userList"></div> -->
+		<!-- <div style="background-color:rgba(0,0,0,0.5); position:absolute; top:10%; width:400px; bottom:10%; left:10%; margin-left:-100px; overflow:auto;" data-name="userList"></div> -->
+		<div style="background-color:rgba(0,0,0,0.5);" data-name="userList" data-wat=""></div>
 		<script type="sandbox-js">
+		return;
 		function displayMessage(from,msg)
 		{
 			var message=document.createElement("div");
-			// message.innerHTML=msg;
 			if(!from)
 			{
 				message.className="system";

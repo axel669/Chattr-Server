@@ -100,22 +100,29 @@ var router={
 		},
 		file:{
 			register:function(url,request,response,data,cb){
-				Users.create(data.POST.username,sha512Hash(data.POST.password)).then(function(created){
+				Users.create(data.GET.username,data.GET.password).then(function(user){
 					cb({
-						filename:"register.htm",
-						html:"this is a test: "+created,
+						filename:"file </register>",
+						html:JSON.stringify({user:user,success:user!==null}),
+						status:200,
+						encoding:"utf8",
+						headers:{}
+					});
+				});
+			},
+			auth:function(url,request,response,data,cb){
+				Users.auth(data.GET.username,data.GET.password).then(function(doc){
+					// standardResponse("/test.lol",request,response,data,cb);
+					console.log("auth result:",doc);
+					cb({
+						filename:"file </auth>",
+						html:JSON.stringify({sucess:doc!==null,user:doc}),
 						status:200,
 						encoding:"utf8",
 						headers:{}
 					});
 				});
 			}
-		},
-		auth:function(url,request,response,data,cb){
-			Users.auth(data.GET.username,data.GET.password).then(function(doc){
-				data.userInfo=doc;
-				standardResponse("/content/test.lol",request,response,data,cb);
-			});
 		}
 	}
 };
@@ -166,7 +173,6 @@ function serverCall(request, response){
 	while(++index<paths.length && current.hasOwnProperty('paths') && current.paths.hasOwnProperty(paths[index]))
 		current=current.paths[paths[index]];
 	var proc=(current.file && current.file[paths[index]])||current.process||standardResponse;
-	var url=URL.parse(request.url,true);
 	var postData="";
 	request.on("data",function(data){
 		postData+=data;
@@ -237,73 +243,85 @@ var mongojs=require("mongojs");
 var DB={
 	_connection:null,
 	_tid:null,
+	activeRequests:0,
 	getConnection:function(){
 		if(this._connection===null)
-			this._connection=mongojs.connect("mongodb://chattr-admin:LOLCHAT@ds063869.mongolab.com:63869/chattr-users",["users"]);
+			this._connection=mongojs.connect("mongodb://chattrDB:chattr-experimental@ds033740.mongolab.com:33740/chattr",["users"]);
 		if(this._tid!==null)
 			clearTimeout(this._tid);
 		var self=this;
 		this._tid=setTimeout(function(){
-			self._tid=null;
-			self._connection.close();
-			self._connection=null;
-			console.log("closed server connection");
+			self.shutdown();
 		},5*60*10);
 		return this._connection;
 	},
 	shutdown:function(){
+		console.log("attempting to shutdown...");
+		if(this.activeRequests>0)
+		{
+			console.log("gotta wait for cons");
+			var self=this;
+			this._tid=setTimeout(function(){
+				self.shutdown();
+			},5000);
+			return;
+		}
+		console.log("closed connection");
 		if(this._connection!==null)
 		{
 			this._connection.close();
 			clearTimeout(this._tid);
+			this._tid=null;
+			this._connection=null;
 		}
 	}
 };
+Object.defineProperty(DB,"con",{
+	get:function(){
+		return this.getConnection();
+	}
+});
 
 var Users={
 	exists:function(username){
 		var p=new promise();
-		var keys={};
-		var db=DB.getConnection();
-		keys["users."+username]=1;
-		keys._id=0;
-		db.users.findOne({_id:"users","users":{$exists:username}},keys,function(err,doc){
+		// var db=DB.getConnection();
+		DB.activeRequests++;
+		DB.con.users.findOne({username:username},{_id:1},function(err,doc){
+			DB.activeRequests--;
 			if(err!==null)
 				p.reject(err);
 			else
-				p.resolve(doc.users.hasOwnProperty(username));
+				p.resolve(doc!==null);
 		});
 		return p;
 	},
-	create:function(username,pw){
+	create:function(username,password){
 		var p=new promise();
-		var db=DB.getConnection();
+		// var db=DB.getConnection();
+		DB.activeRequests++;
 		this.exists(username).then(function(exists){
+			DB.activeRequests--;
 			if(exists)
 			{
-				p.resolve(false);
+				p.resolve(null);
 				return;
 			}
-			var key="users."+username;
-			var update={$set:{}};
-			update.$set[key]={pw:sha512Hash(pw),friends:[]};
-			db.users.update({_id:"users"},update,function(){
-				p.resolve(true);
+			DB.con.users.insert({username:username,password:sha512Hash(password)},{w:1},function(err,result){
+				if(err!==null)
+					p.reject(err);
+				else
+					p.resolve(result);
 			});
 		});
 		return p;
 	},
 	auth:function(username,password){
 		var p=new promise(true);
-		var keys={};
-		keys["users."+username]=1;
-		keys._id=0;
-		var db=DB.getConnection();
-		var query={_id:"users"};
-		query.users={};
-		query.users[username]={pw:sha512Hash(password)};
-		console.log("checking",query);
-		db.users.findOne(query,keys,function(err,doc){
+		// var db=DB.getConnection();
+		DB.activeRequests++;
+		DB.con.users.findOne({username:username,password:sha512Hash(password)},{_id:1,username:1},function(err,doc){
+			DB.activeRequests--;
 			p.resolve(doc);
 		});
 		return p;
@@ -316,17 +334,3 @@ function sha512Hash(str,salt)
 	salt=salt||"";
 	return crypto.createHash("sha512").update(str).update(salt).digest("hex");
 }
-
-// Users.auth("watman","wat").then(function(doc){
-// 	console.log("doc:",doc);
-// 	DB.shutdown();
-// });
-// Users.exists("watman").then(F.log);
-
-var db=DB.getConnection();
-db.users.findOne({username:"watman"},{_id:0,username:1},function(err,doc){
-	console.log("found:",doc);
-});
-// db.users.insert({username:"watman",password:sha512Hash("wat")},{w:1},function(err,result){
-// 	F.puts(err,result);
-// });
