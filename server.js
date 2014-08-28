@@ -227,7 +227,7 @@ io.on('connection',function(socket){
 });
 
 // server.listen(80);
-// sserver.listen(80);
+sserver.listen(80);
 
 
 require("./content/js/factotum");
@@ -247,8 +247,16 @@ var DB={
 			self._tid=null;
 			self._connection.close();
 			self._connection=null;
+			console.log("closed server connection");
 		},5*60*10);
 		return this._connection;
+	},
+	shutdown:function(){
+		if(this._connection!==null)
+		{
+			this._connection.close();
+			clearTimeout(this._tid);
+		}
 	}
 };
 
@@ -286,16 +294,16 @@ var Users={
 		return p;
 	},
 	auth:function(username,password){
-		var p=new promise();
+		var p=new promise(true);
 		var keys={};
 		keys["users."+username]=1;
 		keys._id=0;
 		var db=DB.getConnection();
-		var query={};
-		query["users."+username]={pw:sha512Hash(password)};
-		console.log("checking...");
-		db.users.findOne({_id:"users"},query,keys,function(err,doc){
-			console.log(err,doc);
+		var query={_id:"users"};
+		query.users={};
+		query.users[username]={pw:sha512Hash(password)};
+		console.log("checking",query);
+		db.users.findOne(query,keys,function(err,doc){
 			p.resolve(doc);
 		});
 		return p;
@@ -309,5 +317,13 @@ function sha512Hash(str,salt)
 	return crypto.createHash("sha512").update(str).update(salt).digest("hex");
 }
 
-// Users.auth("watman","wat").then(F.log);
+// Users.auth("watman","wat").then(function(doc){
+// 	console.log("doc:",doc);
+// 	DB.shutdown();
+// });
 // Users.exists("watman").then(F.log);
+
+var db=DB.getConnection();
+// db.users.insert({username:"watman",password:sha512Hash("wat")},{w:1},function(err,result){
+// 	F.puts(err,result);
+// });

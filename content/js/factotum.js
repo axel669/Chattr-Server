@@ -1186,7 +1186,7 @@ function promiseCallback(f,p)
 	return function(value){
 		try{
 			var r=f(value);
-			if(typeof(r.then)==='function')
+			if(r && typeof(r.then)==='function')
 				r.then(
 					function(s){p.resolve(s);},
 					function(e){p.reject(e);}
