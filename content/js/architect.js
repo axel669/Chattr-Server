@@ -172,7 +172,69 @@ function compileAnchor(elem,layoutVars)
 	var style=elem.style;
 	if(info.width)
 	{
+		if(info.left)
+		{
+			info.right={};
+			info.right.anchor=100-info.left.anchor;
+			info.right.offset=-info.width.size;
+		}
+		else if(info.right)
+		{
+			info.left={};
+			info.left.anchor=100-info.right.anchor;
+			info.left.offset=-info.width.size;
+		}
+		// if(info.width.size)
+		// 	style.width=info.width.size+'px';
+		// if(info.width.percent)
+		// 	style.width=info.width.percent+"%";
 	}
+	if(info.height)
+	{
+		if(info.top)
+		{
+			info.bottom={};
+			info.bottom.anchor=100-info.top.anchor;
+			info.bottom.offset=-info.height.size;
+		}
+		else if(info.bottom)
+		{
+			info.top={};
+			info.top.anchor=100-info.bottom.anchor;
+			info.top.offset=-info.height.size;
+		}
+		// if(info.width.size)
+		// 	style.width=info.width.size+'px';
+		// if(info.width.percent)
+		// 	style.width=info.width.percent+"%";
+	}
+	
+	if(info.left.anchor)
+	{
+		style.left=info.left.anchor+"%";
+		if(info.left.offset)
+			style.marginLeft=info.left.offset+"px";
+	}
+	else
+		style.left=info.left.offset+"px";
+	
+	if(info.top.anchor)
+	{
+		style.top=info.top.anchor+"%";
+		if(info.top.offset)
+			style.marginTop=info.top.offset+"px";
+	}
+	else
+		style.top=info.top.offset+"px";
+	
+	if(info.right.anchor)
+	{
+		style.right=info.right.anchor+"%";
+		if(info.right.offset)
+			style.marginRight=info.right.offset+"px";
+	}
+	else
+		style.right=info.right.offset+"px";
 	
 	// elem.style.left=info.anchor.left+"%";
 	// elem.style.top=info.anchor.top+"%";
@@ -206,7 +268,7 @@ function compileAnchor(elem,layoutVars)
 
 function reflow()
 {
-	requestFrame(reflow);
+	// requestFrame(reflow);
 	var elements=document.querySelectorAll("*[data-layout]");
 	for(var x=0, end=elements.length;x<end;++x)
 	{
@@ -230,8 +292,9 @@ function domReadySetup(e)
 	if(+e.data!==message)
 		return;
 	window.removeEventListener("message",domReadySetup);
+	reflow();
 	
-	requestFrame(reflow);
+	// requestFrame(reflow);
 	
 	var elems=document.querySelectorAll("*[data-name]");
 	var elements={};
