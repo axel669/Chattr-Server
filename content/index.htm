@@ -34,16 +34,93 @@
 			font-style:italic;
 			font-color:rgb(150,150,150);
 		}
+		
+		.login-div
+		{
+			background-color:rgba(0,0,0,0.3);
+			border:2px solid black;
+			border-radius:10px;
+			text-align:center;
+			padding-top:65px;
+		}
+		.login-div input
+		{
+			width:250px;
+			text-align:center;
+		}
+		.login-div button
+		{
+			width:125px;
+		}
+		
+		.user-list
+		{
+			background-color:rgba(0,0,0,0.3);
+		}
+		
+		.messages
+		{
+			background-color:rgb(0,255,255,0.2);
+		}
+		
+		.anchored
+		{
+			position:absolute;
+		}
 		</style>
 	</head>
 	<body>
-		<!-- <div style="background-color:cyan; position:absolute; top:0px; left:0px; right:0px; top:0px; bottom:50px; overflow:auto;" data-name="history"></div>
-		<textarea data-name="message" style="position:absolute; bottom:0px; left:0px; height:50px; width:100%;" data-allow-bindings></textarea>
-		<div style="background-color:rgba(0,0,0,0.5); position:absolute; top:0px; right:0px; width:200px; height:450px; overflow:auto;" data-name="userList"></div> -->
-		<!-- <div style="background-color:rgba(0,0,0,0.5); position:absolute; top:10%; width:400px; bottom:10%; left:10%; margin-left:-100px; overflow:auto;" data-name="userList"></div> -->
-		<div style="background-color:rgba(0,0,0,0.5);" data-name="userList" data-layout="anchor[top:10 left:10] size[width:400 height:200]"></div>
+		<div data-name="loginPane" data-layout="anchor[left:50 top:50 right:50 bottom:50] offset[left:-200 top:-100 right:-200 bottom:-100]" class="login-div">
+			<input type="text" placeholder="Username" data-name="loginUsername" value="" /><br />
+			<input type="password" placeholder="Password" data-name="loginPassword" value="" /><br />
+			<button data-name="loginButton">Login</button><button data-name="registerButton">Register</button>
+			<div data-name="loginMessage"></div>
+		</div>
+		<div data-name="chatPane" data-layout="anchor[top:0 left:0 right:0 bottom:0]" style="display:none;">
+			<!-- <div data-name="userList" data-layout="anchor[top:0 left:0 bottom:0] size[width:200]" class="user-list"></div> -->
+			<div data-name="messages" data-layout="anchor[top:0 right:0] offset[bottom:50]" class="messages"></div>
+			<textarea data-name="wat" class="anchored" style="bottom:0px; width:100%; margin-right:300px; height:50px; padding-right:100px; left:0px;"></textarea>
+		</div>
 		<script type="sandbox-js">
-		return;
+		var socket;
+		Element.prototype.on=Element.prototype.addEventListener;
+		var username=null;
+		loginButton.on("click",function(){
+			loginMessage.innerHTML="Logging in...";
+			var url=sprintf("/auth?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
+			F.ajax(url).then(function(response){
+				var info=JSON.parse(response.text);
+				if(info.success)
+				{
+					loginPane.style.display="none";
+					chatPane.style.display="";
+					wat.disabled=true;
+					username=info.user.username;
+					displayMessage(null,"Connecting...");
+					socket=new io();
+					socket.on("connect",function(){
+						displayMessage(null,"Connected!");
+						socket.emit("identify",info.user.username);
+						setupChat();
+					});
+				}
+				else
+				{
+					loginMessage.innerHTML="Wrong infoz";
+					loginPassword.value="";
+				}
+			});
+		});
+		
+		registerButton.on("click",function(){
+			loginMessage.innerHTML="Registering...";
+			var url=sprintf("/register?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
+			F.ajax(url).then(function(response){
+				var success=JSON.parse(response.text);
+				loginMessage.innerHTML="Registration "+(success?"successful":"unsuccessful");
+			});
+		});
+		
 		function displayMessage(from,msg)
 		{
 			var message=document.createElement("div");
@@ -54,57 +131,94 @@
 			}
 			else
 				message.innerHTML=from+": "+msg;
-			history.appendChild(message);
-			history.scrollTop=history.scrollHeight;
+			messages.appendChild(message);
+			messages.scrollTop=messages.scrollHeight;
 		}
-		displayMessage(null,"Connecting...");
 		
-		var user={};
-		
-		var socket=new io();
-		socket.on("connect",function(){
-			var username=-1;
-			while(username===-1)
-			{
-				username=prompt("enter a username");
-				if(/^[\w\d\-_]+$/.test(username)===false)
-					username=-1;
-			}
-			if(typeof(username)!=='string')
-			{
-				displayMessage(null,"Ya'll gotta pick a name.");
-				displayMessage(null,"Refresh and try again.");
-				return;
-			}
-			user.name=username;
-			
-			message.value="";
-			message.addEventListener("keydown",function(evt){
+		function setupChat()
+		{
+			socket.on("chat message",function(msg){
+				displayMessage(msg.from,msg.msg);
+			});
+			wat.disabled=false;
+			wat.addEventListener("keydown",function(evt){
 				if(evt.keyCode===13 && !evt.shiftKey)
 				{
 					evt.preventDefault();
 					setImmediate(function(){
-						socket.emit("chat message",{msg:message.value,from:user.name});
-						displayMessage(user.name,message.value);
-						message.value="";
+						socket.emit("chat message",{msg:wat.value});
+						displayMessage(username,wat.value);
+						wat.value="";
 					});
 					return false;
 				}
 			},false);
+		}
+		
+		loginUsername.focus();
+		
+		// return;
+		// function displayMessage(from,msg)
+		// {
+		// 	var message=document.createElement("div");
+		// 	if(!from)
+		// 	{
+		// 		message.className="system";
+		// 		message.innerHTML=msg;
+		// 	}
+		// 	else
+		// 		message.innerHTML=from+": "+msg;
+		// 	history.appendChild(message);
+		// 	history.scrollTop=history.scrollHeight;
+		// }
+		// displayMessage(null,"Connecting...");
+		
+		// var user={};
+		
+		// var socket=new io();
+		// socket.on("connect",function(){
+		// 	var username=-1;
+		// 	while(username===-1)
+		// 	{
+		// 		username=prompt("enter a username");
+		// 		if(/^[\w\d\-_]+$/.test(username)===false)
+		// 			username=-1;
+		// 	}
+		// 	if(typeof(username)!=='string')
+		// 	{
+		// 		displayMessage(null,"Ya'll gotta pick a name.");
+		// 		displayMessage(null,"Refresh and try again.");
+		// 		return;
+		// 	}
+		// 	user.name=username;
 			
-			socket.emit("login",username);
-			socket.emit("chat message",{msg:username+" has connected"});
-			displayMessage(null,username+" has connected");
-		});
-		socket.on('chat message',function(msg){
-			displayMessage(msg.from,msg.msg);
-		});
-		socket.on('disconnect',function(){
-			displayMessage(null,"disconnected from server");
-		});
-		socket.on('user list',function(users){
-			userList.innerHTML=users.join("<br />");
-		});
+		// 	message.value="";
+		// 	message.addEventListener("keydown",function(evt){
+		// 		if(evt.keyCode===13 && !evt.shiftKey)
+		// 		{
+		// 			evt.preventDefault();
+		// 			setImmediate(function(){
+		// 				socket.emit("chat message",{msg:message.value,from:user.name});
+		// 				displayMessage(user.name,message.value);
+		// 				message.value="";
+		// 			});
+		// 			return false;
+		// 		}
+		// 	},false);
+			
+		// 	socket.emit("login",username);
+		// 	socket.emit("chat message",{msg:username+" has connected"});
+		// 	displayMessage(null,username+" has connected");
+		// });
+		// socket.on('chat message',function(msg){
+		// 	displayMessage(msg.from,msg.msg);
+		// });
+		// socket.on('disconnect',function(){
+		// 	displayMessage(null,"disconnected from server");
+		// });
+		// socket.on('user list',function(users){
+		// 	userList.innerHTML=users.join("<br />");
+		// });
 		</script>
 	</body>
 </html>

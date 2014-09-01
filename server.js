@@ -103,7 +103,7 @@ var router={
 				Users.create(data.GET.username,data.GET.password).then(function(user){
 					cb({
 						filename:"file </register>",
-						html:JSON.stringify({user:user,success:user!==null}),
+						html:JSON.stringify(user!==null),
 						status:200,
 						encoding:"utf8",
 						headers:{}
@@ -116,7 +116,7 @@ var router={
 					console.log("auth result:",doc);
 					cb({
 						filename:"file </auth>",
-						html:JSON.stringify({sucess:doc!==null,user:doc}),
+						html:JSON.stringify({success:doc!==null,user:doc}),
 						status:200,
 						encoding:"utf8",
 						headers:{}
@@ -214,21 +214,22 @@ var users={};
 
 io.on('connection',function(socket){
 	var username=null;
+	console.log("connection accepted");
 	socket.on("disconnect",function(){
 		io.emit("chat message",{msg:username+" has disconnected."});
 		delete users[username];
 		io.emit("user list",Object.keys(users));
 	});
 	socket.on('chat message',function(msg){
+		msg.from=username;
 		socket.broadcast.emit('chat message',msg);
 	});
-	socket.on("login",function(name){
+	socket.on("identify",function(name){
 		username=name;
 		users[name]=null;
+		// console.log("identified:",name);
+		socket.broadcast.emit("chat message",{from:null,msg:name+" has connected"});
 		io.emit("user list",Object.keys(users));
-	});
-	socket.on("user auth",function(info){
-		// Users.
 	});
 });
 
@@ -252,21 +253,21 @@ var DB={
 		var self=this;
 		this._tid=setTimeout(function(){
 			self.shutdown();
-		},5*60*10);
+		},5*60*100);
 		return this._connection;
 	},
 	shutdown:function(){
-		console.log("attempting to shutdown...");
+		// console.log("attempting to shutdown...");
 		if(this.activeRequests>0)
 		{
-			console.log("gotta wait for cons");
+			// console.log("gotta wait for cons");
 			var self=this;
 			this._tid=setTimeout(function(){
 				self.shutdown();
 			},5000);
 			return;
 		}
-		console.log("closed connection");
+		// console.log("closed connection");
 		if(this._connection!==null)
 		{
 			this._connection.close();
@@ -285,7 +286,6 @@ Object.defineProperty(DB,"con",{
 var Users={
 	exists:function(username){
 		var p=new promise();
-		// var db=DB.getConnection();
 		DB.activeRequests++;
 		DB.con.users.findOne({username:username},{_id:1},function(err,doc){
 			DB.activeRequests--;
@@ -298,7 +298,6 @@ var Users={
 	},
 	create:function(username,password){
 		var p=new promise();
-		// var db=DB.getConnection();
 		DB.activeRequests++;
 		this.exists(username).then(function(exists){
 			DB.activeRequests--;
@@ -318,7 +317,6 @@ var Users={
 	},
 	auth:function(username,password){
 		var p=new promise(true);
-		// var db=DB.getConnection();
 		DB.activeRequests++;
 		DB.con.users.findOne({username:username,password:sha512Hash(password)},{_id:1,username:1},function(err,doc){
 			DB.activeRequests--;

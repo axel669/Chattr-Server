@@ -123,22 +123,6 @@ function parseAnchor(str)
 {
 	var pos=0, len=str.length;
 	var info={
-		// anchor:{
-		// 	left:0,
-		// 	right:0,
-		// 	top:0,
-		// 	bottom:0
-		// },
-		// offset:{
-		// 	left:0,
-		// 	right:0,
-		// 	top:0,
-		// 	bottom:0
-		// },
-		// size:{
-		// 	width:null,
-		// 	height:null
-		// }
 	};
 	while(pos<len)
 	{
@@ -167,7 +151,6 @@ function compileAnchor(elem,layoutVars)
 		return layoutVars[name];
 	});
 	var info=parseAnchor(anchorText);
-	console.log(info);
 	
 	var style=elem.style;
 	if(info.width)
@@ -184,10 +167,6 @@ function compileAnchor(elem,layoutVars)
 			info.left.anchor=100-info.right.anchor;
 			info.left.offset=-info.width.size;
 		}
-		// if(info.width.size)
-		// 	style.width=info.width.size+'px';
-		// if(info.width.percent)
-		// 	style.width=info.width.percent+"%";
 	}
 	if(info.height)
 	{
@@ -203,13 +182,14 @@ function compileAnchor(elem,layoutVars)
 			info.top.anchor=100-info.bottom.anchor;
 			info.top.offset=-info.height.size;
 		}
-		// if(info.width.size)
-		// 	style.width=info.width.size+'px';
-		// if(info.width.percent)
-		// 	style.width=info.width.percent+"%";
 	}
 	
-	if(info.left.anchor)
+	var def=['left','right','top','bottom'];
+	for(var x=0;x<4;++x)
+		if(!info.hasOwnProperty(def[x]))
+			info[def[x]]={offset:0};
+	
+	if(info.left.hasOwnProperty('anchor'))
 	{
 		style.left=info.left.anchor+"%";
 		if(info.left.offset)
@@ -218,7 +198,7 @@ function compileAnchor(elem,layoutVars)
 	else
 		style.left=info.left.offset+"px";
 	
-	if(info.top.anchor)
+	if(info.top.hasOwnProperty('anchor'))
 	{
 		style.top=info.top.anchor+"%";
 		if(info.top.offset)
@@ -227,7 +207,7 @@ function compileAnchor(elem,layoutVars)
 	else
 		style.top=info.top.offset+"px";
 	
-	if(info.right.anchor)
+	if(info.right.hasOwnProperty('anchor'))
 	{
 		style.right=info.right.anchor+"%";
 		if(info.right.offset)
@@ -236,29 +216,15 @@ function compileAnchor(elem,layoutVars)
 	else
 		style.right=info.right.offset+"px";
 	
-	// elem.style.left=info.anchor.left+"%";
-	// elem.style.top=info.anchor.top+"%";
-	// if(info.offset.left!==0)
-	// 	elem.style.marginLeft=info.offset.left+'px';
-	// if(info.offset.top!==0)
-	// 	elem.style.marginTop=info.offset.top+'px';
+	if(info.bottom.hasOwnProperty('anchor'))
+	{
+		style.bottom=info.bottom.anchor+"%";
+		if(info.bottom.offset)
+			style.marginBottom=info.bottom.offset+"px";
+	}
+	else
+		style.bottom=info.bottom.offset+"px";
 	
-	// if(info.size.width!==null)
-	// 	elem.style.width=info.size.width+'px';
-	// else
-	// {
-	// 	elem.style.right=(100-info.anchor.right)+"%";
-	// 	if(info.offset.right!==0)
-	// 		elem.style.marginRight=info.offset.right+'px';
-	// }
-	// if(info.size.height!==null)
-	// 	elem.style.height=info.size.height+'px';
-	// else
-	// {
-	// 	elem.style.bottom=(100-info.anchor.bottom)+"%";
-	// 	if(info.offset.bottom!==0)
-	// 		elem.style.marginBottom=info.offset.bottom+'px';
-	// }
 	elem.lastLayout=anchorText;
 	
 	var styleCheck=getComputedStyle(elem);
