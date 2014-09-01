@@ -86,6 +86,11 @@
 		Element.prototype.on=Element.prototype.addEventListener;
 		var username=null;
 		loginButton.on("click",function(){
+			if(loginUsername.value.toString().replace(/^\s+|\s+$/g,"")==="" || loginPassword.value==="")
+			{
+				loginMessage.innerHTML="Have to enter username and password to login";
+				return;
+			}
 			loginMessage.innerHTML="Logging in...";
 			var url=sprintf("/auth?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
 			F.ajax(url).then(function(response){
@@ -113,6 +118,11 @@
 		});
 		
 		registerButton.on("click",function(){
+			if(loginUsername.value.toString().replace(/^\s+|\s+$/g,"")==="" || loginPassword.value==="")
+			{
+				loginMessage.innerHTML="Have to enter username and password to register";
+				return;
+			}
 			loginMessage.innerHTML="Registering...";
 			var url=sprintf("/register?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
 			F.ajax(url).then(function(response){
