@@ -157,7 +157,7 @@ function serverCall(request, response){
 		if(url.pathname==="/")
 		{
 			response.writeHead(200,{"Content-Type":"text/html"});
-			response.end("<!DOCTYPE html><html><head><title>Chattr</title></head><body>Gotta use dat <a href='https://"+request.headers.host+"'>https</a></body></html>");
+			response.end(sprintf("<!DOCTYPE html><html><head><title>Chattr</title></head><body>Redirecting to https...<script>document.location='https://%{0}';</script></body></html>",request.headers.host));
 		}
 		else
 		{
