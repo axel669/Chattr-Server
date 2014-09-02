@@ -1593,6 +1593,7 @@ function ajax(url,postData,async,callback)
 	var method=postData?"POST":"GET";
 	try{
 		request.open(method,url,async!==false);
+		request.setRequestHeader("Content-Type","application/json");
 		request.send(postData||null);
 	}
 	catch(err){

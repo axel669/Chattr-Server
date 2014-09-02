@@ -60,7 +60,7 @@
 		
 		.messages
 		{
-			background-color:rgb(0,255,255,0.2);
+			background-color:rgba(0,255,255,0.2);
 		}
 		
 		.anchored
@@ -92,7 +92,7 @@
 				return;
 			}
 			loginMessage.innerHTML="Logging in...";
-			var url=sprintf("/auth?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
+			var url=sprintf("/auth/%{0}/%{1}",loginUsername.value,loginPassword.value);
 			F.ajax(url).then(function(response){
 				var info=JSON.parse(response.text);
 				if(info.success)
@@ -124,7 +124,7 @@
 				return;
 			}
 			loginMessage.innerHTML="Registering...";
-			var url=sprintf("/register?username=%{0/url}&password=%{1/url}",loginUsername.value,loginPassword.value);
+			var url=sprintf("/register/%{0}/%{1}",loginUsername.value,loginPassword.value);
 			F.ajax(url).then(function(response){
 				var success=JSON.parse(response.text);
 				loginMessage.innerHTML="Registration "+(success?"successful":"unsuccessful");
