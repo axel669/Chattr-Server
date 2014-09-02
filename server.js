@@ -21,25 +21,28 @@ app.get("/register/:username/:password",function(request,response){
 	});
 });
 
-app.get("/*",function(request,response){
+app.get("/",function(request,response){
 	if(request.get("x-forwarded-proto")==="http")
 	{
-		if(request.path==="/")
-		{
-			response.set("content-type","text/html");
-			response.send(
-				sprintf(
-					"<!DOCTYPE html><html><head><title>Chattr</title></head><body>Redirecting to https...<script>document.location='https://%{0}';</script></body></html>",
-					request.get("host")
-				)
-			);
-		}
-		else
-			response.status(404).send("This is not the page you are looking for");
+		response.set("content-type","text/html");
+		response.send(
+			sprintf(
+				"<!DOCTYPE html><html><head><title>Chattr</title></head><body>Redirecting to https...<script>document.location='https://%{0}';</script></body></html>",
+				request.get("host")
+			)
+		);
+		return;
+	}
+	response.sendFile(__dirname+"/content/index.htm");
+});
+
+app.use(function(request,response,next){
+	if(request.get("x-forwarded-proto")==="http")
+	{
+		response.status(404).send("This is not the page you are looking for");
 		return;
 	}
 	var filepath=__dirname+"/content"+request.path;
-	// console.log(filepath);
 	if(fs.existsSync(filepath))
 	{
 		if(fs.statSync(filepath).isDirectory())
