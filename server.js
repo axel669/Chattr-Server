@@ -26,7 +26,7 @@ app.get("/*",function(request,response){
 	{
 		if(request.path==="/")
 		{
-			response.set("content-type","text.html");
+			response.set("content-type","text/html");
 			response.send(
 				sprintf(
 					"<!DOCTYPE html><html><head><title>Chattr</title></head><body>Redirecting to https...<script>document.location='https://%{0}';</script></body></html>",
@@ -35,7 +35,8 @@ app.get("/*",function(request,response){
 			);
 		}
 		else
-			response.send(404,"This is not the page you are looking for");
+			response.status(404).send("This is not the page you are looking for");
+		return;
 	}
 	var filepath=__dirname+"/content"+request.path;
 	// console.log(filepath);
