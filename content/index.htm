@@ -3,11 +3,13 @@
 	<head>
 		<title>Chattr Alpha</title>
 		<meta charset="utf8" />
+		<link rel="stylesheet" type="text/css" href="iboxxy.css" />
 		<script src="js/architect.js"></script>
 		<script src="js/factotum.js"></script>
 		<script src="js/keyblade.js"></script>
 		<script src="js/socket.io-min.js"></script>
 		<script src="js/xregexp-min.js"></script>
+		<script src="js/iboxxy.js"></script>
 		<style>
 		html, body
 		{
@@ -166,69 +168,6 @@
 		}
 		
 		loginUsername.focus();
-		
-		// return;
-		// function displayMessage(from,msg)
-		// {
-		// 	var message=document.createElement("div");
-		// 	if(!from)
-		// 	{
-		// 		message.className="system";
-		// 		message.innerHTML=msg;
-		// 	}
-		// 	else
-		// 		message.innerHTML=from+": "+msg;
-		// 	history.appendChild(message);
-		// 	history.scrollTop=history.scrollHeight;
-		// }
-		// displayMessage(null,"Connecting...");
-		
-		// var user={};
-		
-		// var socket=new io();
-		// socket.on("connect",function(){
-		// 	var username=-1;
-		// 	while(username===-1)
-		// 	{
-		// 		username=prompt("enter a username");
-		// 		if(/^[\w\d\-_]+$/.test(username)===false)
-		// 			username=-1;
-		// 	}
-		// 	if(typeof(username)!=='string')
-		// 	{
-		// 		displayMessage(null,"Ya'll gotta pick a name.");
-		// 		displayMessage(null,"Refresh and try again.");
-		// 		return;
-		// 	}
-		// 	user.name=username;
-			
-		// 	message.value="";
-		// 	message.addEventListener("keydown",function(evt){
-		// 		if(evt.keyCode===13 && !evt.shiftKey)
-		// 		{
-		// 			evt.preventDefault();
-		// 			setImmediate(function(){
-		// 				socket.emit("chat message",{msg:message.value,from:user.name});
-		// 				displayMessage(user.name,message.value);
-		// 				message.value="";
-		// 			});
-		// 			return false;
-		// 		}
-		// 	},false);
-			
-		// 	socket.emit("login",username);
-		// 	socket.emit("chat message",{msg:username+" has connected"});
-		// 	displayMessage(null,username+" has connected");
-		// });
-		// socket.on('chat message',function(msg){
-		// 	displayMessage(msg.from,msg.msg);
-		// });
-		// socket.on('disconnect',function(){
-		// 	displayMessage(null,"disconnected from server");
-		// });
-		// socket.on('user list',function(users){
-		// 	userList.innerHTML=users.join("<br />");
-		// });
 		</script>
 	</body>
 </html>

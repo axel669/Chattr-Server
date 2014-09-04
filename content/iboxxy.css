@@ -1,0 +1,37 @@
+.iboxxy-overlay
+{
+	position:fixed;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	background-color:rgba(0,0,0,0.3);
+	z-index:10000;
+}
+
+.iboxxy-display-wrapper
+{
+	position:absolute;
+	left:50%;
+	top:50%;
+	width:400px;
+	height:200px;
+	margin-left:-200px;
+	margin-top:-100px;
+	background-color:blue;
+}
+
+.iboxxy-button-wrapper
+{
+	overflow:hidden;
+	height:30px;
+	width:100%;
+	text-align:center;
+	padding:2px;
+}
+
+.iboxxy-button
+{
+	height:25px;
+	width:40%;
+}
