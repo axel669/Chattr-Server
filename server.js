@@ -21,7 +21,7 @@ app.get("/register/:username/:password",function(request,response){
 	});
 });
 
-app.get("/",function(request,response){
+app.get("/",function(request,response,next){
 	if(request.get("x-forwarded-proto")==="http")
 	{
 		response.set("content-type","text/html");
@@ -33,10 +33,10 @@ app.get("/",function(request,response){
 		);
 		return;
 	}
-	response.sendFile(__dirname+"/content/index.htm");
+	next();
 });
 
-app.use(function(request,response,next){
+app.use(function(request,response){
 	if(request.get("x-forwarded-proto")==="http")
 	{
 		response.status(404).send("This is not the page you are looking for");
