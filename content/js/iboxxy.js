@@ -10,16 +10,23 @@ function createElem(tag,cn)
 
 function showAlert(msg)
 {
+	contentWrapper.innerHTML=msg;
 }
 
 var overlay=createElem("div","iboxxy-overlay");
 var displayWrapper=createElem("div","iboxxy-display-wrapper");
 
-var titleWrapper=createElem("div");
+var titleWrapper=createElem("div","iboxxy-title-wrapper");
 var contentWrapper=createElem("div","iboxxy-content-wrapper");
 var buttonWrapper=createElem("div","iboxxy-button-wrapper");
 
-buttonWrapper.innerHTML="<button class='iboxxy-button'>Wat</button>";
+var okButton=createElem("button","iboxxy-button");
+okButton.addEventListener("click",function(evt){
+	console.log("WAT");
+},false);
+okButton.innerHTML="OK";
+
+buttonWrapper.appendChild(okButton);
 
 displayWrapper.appendChild(titleWrapper);
 displayWrapper.appendChild(contentWrapper);
